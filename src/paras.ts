@@ -51,21 +51,34 @@ export async function generateParachainFiles(
     const relayChainSpec = JSON.parse(
       fs.readFileSync(relayChainSpecFullPathPlain).toString()
     );
-    plainData.para_id = parachain.id;
-    plainData.relay_chain = relayChainSpec.id;
-    plainData.genesis.runtime.parachainInfo.parachainId = parachain.id;
-    const data = JSON.stringify(plainData, null, 2);
-    fs.writeFileSync(chainSpecFullPathPlain, data);
 
-    debug("creating chain spec raw");
-    // generate the raw chain spec
-    await getChainSpecRaw(
-      namespace,
-      parachain.collators[0].image,
-      `${chainName}-${parachain.id}`,
-      parachain.collators[0].command!,
-      chainSpecFullPath
-    );
+    if(plainData.genesis.runtime) {
+      plainData.para_id = parachain.id;
+      plainData.relay_chain = relayChainSpec.id;
+      plainData.genesis.runtime.parachainInfo.parachainId = parachain.id;
+
+      const data = JSON.stringify(plainData, null, 2);
+      fs.writeFileSync(chainSpecFullPathPlain, data);
+
+      debug("creating chain spec raw");
+      // generate the raw chain spec
+      await getChainSpecRaw(
+        namespace,
+        parachain.collators[0].image,
+        `${chainName}-${parachain.id}`,
+        parachain.collators[0].command!,
+        chainSpecFullPath
+      );
+    } else {
+      plainData.paraId = parachain.id;
+      plainData.relayChain = relayChainSpec.id;
+
+      const data = JSON.stringify(plainData, null, 2);
+      fs.writeFileSync(chainSpecFullPathPlain, data);
+
+      debug("Chain spec is in raw format, just copy over...");
+      fs.copyFileSync(chainSpecFullPathPlain, chainSpecFullPath);
+    }
 
     // add spec file to copy to all collators.
     parachain.specPath = chainSpecFullPath;
