@@ -1,0 +1,31 @@
+[settings]
+timeout = 1000
+bootnode = false
+
+[relaychain]
+default_image = "{{ZOMBIENET_INTEGRATION_TEST_IMAGE}}"
+chain = "rococo-local"
+
+
+  [[relaychain.nodes]]
+  name = "alice"
+  args = [ "-lparachain=debug" ]
+
+  [[relaychain.nodes]]
+  name = "bob"
+  args = [ "-lparachain=debug" ]
+
+[[parachains]]
+id = 2007
+addToGenesis = false
+cumulus_based = true
+
+  [parachains.collator]
+  name = "collator"
+  command = "astar-collator"
+  args = ["-lparachain=debug"]
+
+[types.Header]
+number = "u64"
+parent_hash = "Hash"
+post_state = "Hash"
